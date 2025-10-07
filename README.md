@@ -1,1 +1,67 @@
-# chat-kosimov
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Чат с OpenAI</title>
+<style>
+  body { font-family: Arial; margin: 30px; }
+  input { width: 400px; padding: 8px; }
+  button { padding: 8px; }
+  #chat { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
+  .user { color: blue; }
+  .bot { color: green; }
+</style>
+</head>
+<body>
+<h1>Чат с GPT</h1>
+<input id="userInput" type="text" placeholder="Напиши сообщение..." />
+<button id="sendBtn">Отправить</button>
+
+<div id="chat"></div>
+
+<script>
+const chat = document.getElementById('chat');
+const input = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+
+sendBtn.addEventListener('click', sendMessage);  // <-- главное! слушатель события
+
+async function sendMessage() {
+  const userText = input.value.trim();
+  if (!userText) return;
+
+  chat.innerHTML += <div class="user"><b>Ты:</b> ${userText}</div>;
+  input.value = '';
+  chat.scrollTop = chat.scrollHeight;
+
+  const botResponse = await getOpenAIResponse(userText);
+  chat.innerHTML += <div class="bot"><b>ИИ:</b> ${botResponse}</div>;
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function getOpenAIResponse(message) {
+  const apiKey = "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"; // <-- вставь свой ключ
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": Bearer ${apiKey}
+      },
+      body: JSON.stringify({
+        model: "gpt-4",
+        messages: [{role: "user", content: message}],
+        max_tokens: 200
+      })
+    });
+    const data = await res.json();
+    return data.choices[0].message.content;
+  } catch (err) {
+    console.error(err);
+    return "Ошибка: не удалось получить ответ от GPT.";
+  }
+}
+</script>
+</body>
+
+</html># chat-kosimov
